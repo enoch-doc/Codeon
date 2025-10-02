@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/Codeon logo02.png" alt="Codeon Logo" width="200"/>
+  <img src="assets/Codeon logo02.png" alt="Codeon Logo" width="1000" style="border-radius:50px;"/>
 </p>
 
 # Codeon
