@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/Codeon logo02.png" alt="Codeon Logo" width="200"/>
+</p>
+
 # Codeon
 
 Codeon is a **smart contract auditing and analysis platform** designed to help developers evaluate the **security, performance, and compliance** of their smart contracts before deployment.  
