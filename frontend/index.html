@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Codeon — Secure Your Smart Contracts</title>
+  <link rel="shortcut icon" type="image/x-icon" href="Codeonlogo.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Animations */
+    @keyframes pulse-glow {
+      0%,100% { box-shadow: 0 0 16px rgba(59,130,246,0.5); }
+      50% { box-shadow: 0 0 28px rgba(99,102,241,0.9); }
+    }
+    .animate-fadeIn { opacity: 0; transform: translateY(12px); transition: opacity .8s ease, transform .8s ease; }
+    .animate-fadeIn.is-visible { opacity: 1; transform: translateY(0); }
+    .animate-slideUp { opacity: 0; transform: translateY(24px); transition: opacity .8s ease, transform .8s ease; }
+    .animate-slideUp.is-visible { opacity: 1; transform: translateY(0); }
+    .timeline-dot {
+      box-shadow: 0 0 10px rgba(59,130,246,0.6);
+      animation: dotPulse 2s infinite;
+    }
+    @keyframes dotPulse {
+      0%,100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+    /* Particles canvas covers page */
+    #particles {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body class="bg-black text-white overflow-x-hidden">
+
+  <!-- Particles background -->
+  <canvas id="particles"></canvas>
+
+  <!-- NAVBAR -->
+  <nav class="fixed top-0 w-full bg-black/60 backdrop-blur z-50 border-b border-gray-800">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <img src="codeonbg.png" alt="Codeon Logo" class="w-50 h-20"/>
+        
+      </div>
+      <div class="hidden md:flex items-center space-x-8">
+        <a href="#overview" class="hover:text-blue-400">Overview</a>
+        <a href="#features" class="hover:text-blue-400">Features</a>
+        <a href="#flow" class="hover:text-blue-400">How It Works</a>
+        <a href="#roadmap" class="hover:text-blue-400">Roadmap</a>
+      </div>
+      <div class="flex items-center space-x-4">
+        <a href="login.html" class="px-4 py-2 text-sm font-semibold hover:text-blue-400">Login</a>
+        <a href="signup.html" class="px-4 py-2 text-sm font-semibold border border-blue-500 rounded hover:bg-blue-600">Create Account</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="relative min-h-screen flex items-center justify-center text-center px-6">
+    <!-- Blurred watermark logo -->
+    <img src="Codeonlogo.png" alt="Codeon Logo" class="absolute inset-0 m-auto w-[800px] h-[800px] opacity-15 blur-1xl"/>
+    <div class="relative z-10 max-w-3xl animate-slideUp">
+      <h1 class="text-5xl md:text-6xl font-extrabold leading-tight">Welcome to
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Codeon</span>
+      </h1>
+      <p class="mt-4 text-2xl font-semibold">Let’s Secure Your Smart Contracts.</p>
+      <p class="mt-4 text-gray-300">
+        Unlock deep insights, precision audits, and total confidence in your code — powered by
+        <span class="font-bold text-blue-400">Codeon</span>.
+      </p>
+      <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="signup.html"
+           class="px-8 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 font-semibold text-white transition transform hover:scale-105"
+           style="animation: pulse-glow 2s infinite;">
+          Get Started Now
+        </a>
+        <a href="#flow"
+           class="px-8 py-3 rounded-lg border border-gray-600 hover:border-blue-400 font-semibold text-gray-300 hover:text-white transition">
+          How It Works
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- OVERVIEW -->
+  <section id="overview" class="relative z-10 py-20 px-6">
+    <div class="max-w-4xl mx-auto text-center animate-fadeIn">
+      <h2 class="text-3xl font-bold mb-6">Project Overview</h2>
+      <p class="text-gray-300">
+        Codeon is a smart contract auditing and analysis platform designed to help developers evaluate security, performance, and compliance before deployment.
+        It provides automated multi-language support, runs a full suite of static and functional tests, and generates sleek PDF reports with detailed findings, charts, and actionable insights.
+      </p>
+    </div>
+  </section>
+
+  <!-- CORE OBJECTIVES -->
+  <section class="relative z-10 py-20 px-6 bg-gray-900/40">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-3xl font-bold text-center mb-12 animate-fadeIn">Core Objectives</h2>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Objective card template with icon -->
+        <div class="p-6 bg-gray-800 rounded-lg hover:scale-105 transition animate-fadeIn">
+          <div class="flex items-center space-x-3 mb-3">
+            <!-- Globe icon -->
+            <svg class="w-6 h-6 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="10" stroke-width="2"/>
+              <path d="M2 12h20M12 2c3 4 3 14 0 20M12 2c-3 4-3 14 0 20" stroke-width="2"/>
+            </svg>
+            <h3 class="font-semibold text-blue-400">Multi-language analysis</h3>
+          </div>
+          <p class="text-gray-300">Solidity, Vyper, Rust, Move, Cairo, and more.</p>
+        </div>
+
+        <div class="p-6 bg-gray-800 rounded-lg hover:scale-105 transition animate-fadeIn">
+          <div class="flex items-center space-x-3 mb-3">
+            <!-- Shield check -->
+            <svg class="w-6 h-6 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 3l7 4v5c0 5-3.5 9-7 9s-7-4-7-9V7l7-4z" stroke-width="2"/>
+              <path d="M9 12l2 2 4-4" stroke-width="2"/>
+            </svg>
+            <h3 class="font-semibold text-blue-400">Comprehensive testing</h3>
+          </div>
+          <p class="text-gray-300">Vulnerabilities, gas efficiency, compliance, and logic.</p>
+        </div>
+
+        <div class="p-6 bg-gray-800 rounded-lg hover:scale-105 transition animate-fadeIn">
+          <div class="flex items-center space-x-3 mb-3">
+            <!-- Document icon -->
+            <svg class="w-6 h-6 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M7 3h7l5 5v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" stroke-width="2"/>
+              <path d="M14 3v6h6" stroke-width="2"/>
+            </svg>
+            <h3 class="font-semibold text-blue-400">Professional reports</h3>
+          </div>
+          <p class="text-gray-300">PDFs with charts, severity levels, and recommendations.</p>
+        </div>
+
+        <div class="p-6 bg-gray-800 rounded-lg hover:scale-105 transition animate-fadeIn">
+          <div class="flex items-center space-x-3 mb-3">
+            <!-- Upload icon -->
+            <svg class="w-6 h-6 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 16V4M7 9l5-5 5 5" stroke-width="2"/>
+              <path d="M20 20H4a2 2 0 0 1-2-2v-4" stroke-width="2"/>
+            </svg>
+            <h3 class="font-semibold text-blue-400">Simple frontend</h3>
+          </div>
+          <p class="text-gray-300">Upload contracts, run audits, download results.</p>
+        </div>
+
+        <div class="p-6 bg-gray-800 rounded-lg hover:scale-105 transition animate-fadeIn">
+          <div class="flex items-center space-x-3 mb-3">
+            <!-- Chart icon -->
+            <svg class="w-6 h-6 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M3 3v18h18" stroke-width="2"/>
+              <path d="M7 13v5M12 9v9M17 5v13" stroke-width="2"/>
+            </svg>
+            <h3 class="font-semibold text-blue-400">Scalable platform</h3>
+          </div>
+          <p class="text-gray-300">Built for indie devs and enterprises.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KEY FEATURES -->
+  <section id="features" class="relative z-10 py-20 px-6">
+    <div class="max-w-7xl mx-auto">
+      <h2 class="text-3xl font-bold text-center mb-12 animate-fadeIn">Key Features</h2>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Feature card -->
+        <div class="p-6 bg-gray-800 rounded-lg hover:scale-105 transition animate-fadeIn">
+          <div class="flex items-center space-x-3 mb-3">
+            <!-- Bug icon -->
+            <svg class="w-6 h-6 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M9 9h6M4 13h16M6 17h12" stroke-width="2"/>
+              <circle cx="12" cy="7" r="3" stroke-width="2"/>
+            </svg>
+            <h3 class="font-semibold text-blue-400">Security vulnerability checks</h3>
+          </div>
+          <p class="text-gray-300">Reentrancy, overflow/underflow, access control flaws, unchecked calls.</p>
+        </div>
+
+        <div class="p-6 bg-gray-800 rounded-lg hover:scale-105 transition animate-fadeIn">
+          <div class="flex items-center space-x-3 mb-3">
+            <!-- Lightning icon -->
+            <svg class="w-6 h-6 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M13 3L4 14h7l-1 7 10-13h-7l0-5z" stroke-width="2"/>
+            </svg>
+            <h3 class="font-semibold text-blue-400">Gas & performance optimization</h3>
+          </div>
+          <p class="text-gray-300">Detect inefficient loops and high-gas operations.</p>
+        </div>
+
+        <div class="p-6 bg-gray-800 rounded-lg hover:scale-105 transition animate-fadeIn">
+          <div class="flex items-center space-x-3 mb-3">
+            <!-- Badge icon -->
+            <svg class="w-6 h-6 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 2l7 4v6c0 4-3 8-7 10-4-2-7-6-7-10V6l7-4z" stroke-width="2"/>
+              <path d="M9 10l3 3 4-4" stroke-width="2"/>
+            </svg>
+            <h3 class="font-semibold text-blue-400">Compliance & standards</h3>
+          </div>
+          <p class="text-gray-300">ERC‑20, ERC‑721, ERC‑1155 conformance checks.</p>
+        </div>
+
+        <div class="p-6 bg-gray-800 rounded-lg hover:scale-105 transition animate-fadeIn">
+          <div class="flex items-center space-x-3 mb-3">
+            <!-- Function icon -->
+            <svg class="w-6 h-6 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M4 6h16M4 12h10M4 18h6" stroke-width="2"/>
+            </svg>
+            <h3 class="font-semibold text-blue-400">Logic & functionality</h3>
+          </div>
+          <p class="text-gray-300">Detect DoS, front‑running, dead code, misuse of self‑destruct.</p>
+        </div>
+
+        <div class="p-6 bg-gray-800 rounded-lg hover:scale-105 transition animate-fadeIn">
+          <div class="flex items-center space-x-3 mb-3">
+            <!-- Layers icon -->
+            <svg class="w-6 h-6 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 2l9 5-9 5-9-5 9-5z" stroke-width="2"/>
+              <path d="M3 14l9 5 9-5" stroke-width="2"/>
+            </svg>
+            <h3 class="font-semibold text-blue-400">Deployment & upgradeability</h3>
+          </div>
+          <p class="text-gray-300">Check delegatecall risks, proxy patterns, constructor safety.</p>
+        </div>
+
+        <div class="p-6 bg-gray-800 rounded-lg hover:scale-105 transition animate-fadeIn">
+          <div class="flex items-center space-x-3 mb-3">
+            <!-- Chart/doc icon -->
+            <svg class="w-6 h-6 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M7 3h7l5 5v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" stroke-width="2"/>
+              <path d="M9 12h6M9 16h4" stroke-width="2"/>
+            </svg>
+            <h3 class="font-semibold text-blue-400">PDF reports</h3>
+          </div>
+          <p class="text-gray-300">Executive summaries, severity levels, charts, recommendations.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS: Interactive horizontal timeline -->
+  <section id="flow" class="relative z-10 py-20 px-6 bg-gray-900/40">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-3xl font-bold text-center mb-12 animate-fadeIn">How It Works</h2>
+      <p class="text-center text-gray-400 mb-10 animate-fadeIn">See how easy it is to get started with Codeon.</p>
+
+      <div class="relative animate-fadeIn">
+        <div class="hidden md:block absolute left-0 right-0 top-8 h-0.5 bg-gray-700"></div>
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-10 md:gap-4">
+          <!-- Step component -->
+          <div class="text-center">
+            <div class="mx-auto w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center timeline-dot">
+              <!-- Link icon -->
+              <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" stroke-width="2"/>
+              </svg>
+            </div>
+            <p class="mt-3 font-semibold">Visit App</p>
+          </div>
+          <div class="text-center">
+            <div class="mx-auto w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center timeline-dot">
+              <!-- Upload icon -->
+              <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 16V4M7 9l5-5 5 5" stroke-width="2"/>
+              </svg>
+            </div>
+            <p class="mt-3 font-semibold">Upload Contract</p>
+          </div>
+          <div class="text-center">
+            <div class="mx-auto w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center timeline-dot">
+              <!-- List icon -->
+              <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M5 7h14M5 12h14M5 17h10" stroke-width="2"/>
+              </svg>
+            </div>
+            <p class="mt-3 font-semibold">Select Language</p>
+          </div>
+          <div class="text-center">
+            <div class="mx-auto w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center timeline-dot">
+              <!-- Shield icon -->
+              <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 3l7 4v5c0 5-3.5 9-7 9s-7-4-7-9V7l7-4z" stroke-width="2"/>
+              </svg>
+            </div>
+            <p class="mt-3 font-semibold">Run Audit</p>
+          </div>
+          <div class="text-center">
+            <div class="mx-auto w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center timeline-dot">
+              <!-- Download icon -->
+              <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 5v10M7 10l5 5 5-5" stroke-width="2"/>
+                <path d="M20 20H4" stroke-width="2"/>
+              </svg>
+            </div>
+            <p class="mt-3 font-semibold">Download PDF</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DELIVERABLES (MVP Scope) -->
+  <section class="relative z-10 py-20 px-6">
+    <div class="max-w-4xl mx-auto text-center animate-fadeIn">
+      <h2 class="text-3xl font-bold mb-6">Deliverables (MVP Scope)</h2>
+      <ul class="text-gray-300 space-y-3">
+        <li>✔ Simple one-page web interface</li>
+        <li>✔ Initial Solidity support</li>
+        <li>✔ Core vulnerability checks + gas optimization</li>
+        <li>✔ PDF report generation</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- FUTURE ROADMAP: Interactive vertical timeline -->
+  <section id="roadmap" class="relative z-10 py-20 px-6 bg-gray-900/40">
+    <div class="max-w-4xl mx-auto animate-fadeIn">
+      <h2 class="text-3xl font-bold text-center mb-12">Future Roadmap</h2>
+      <div class="relative">
+        <!-- Vertical line -->
+        <div class="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-0.5 bg-gray-700"></div>
+
+        <!-- Milestone -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mb-12">
+          <div class="md:text-right">
+            <h3 class="font-semibold text-blue-400">Multi-language support</h3>
+            <p class="text-gray-300">Expansion across Rust, Move, Cairo and more.</p>
+          </div>
+          <div class="md:text-left flex items-center md:justify-start justify-center">
+            <div class="w-4 h-4 rounded-full bg-blue-600 timeline-dot"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mb-12">
+          <div class="md:text-right">
+            <h3 class="font-semibold text-blue-400">Deeper compliance tests</h3>
+            <p class="text-gray-300">Stronger conformance for industry standards.</p>
+          </div>
+          <div class="md:text-left flex items-center md:justify-start justify-center">
+            <div class="w-4 h-4 rounded-full bg-blue-600 timeline-dot"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          <div class="md:text-right">
+            <h3 class="font-semibold text-blue-400">AI‑powered remediation</h3>
+            <p class="text-gray-300">Guided fixes and auto suggestions.</p>
+          </div>
+          <div class="md:text-left flex items-center md:justify-start justify-center">
+            <div class="w-4 h-4 rounded-full bg-blue-600 timeline-dot"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="relative z-10 bg-black/80 border-t border-gray-800 py-10">
+    <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
+      <div class="flex items-center space-x-3">
+        <img src="Codeonlogo.png" alt="Codeon Logo" class="w-8 h-8"/>
+        <span class="font-bold text-lg">Codeon</span>
+      </div>
+      <div class="flex space-x-6 text-gray-400 text-sm">
+        <a href="#overview" class="hover:text-blue-400">Overview</a>
+        <a href="#features" class="hover:text-blue-400">Features</a>
+        <a href="#flow" class="hover:text-blue-400">How It Works</a>
+        <a href="#roadmap" class="hover:text-blue-400">Roadmap</a>
+        <a href="#" class="hover:text-blue-400">Docs</a>
+        <a href="#" class="hover:text-blue-400">Contact</a>
+        <a href="#" class="hover:text-blue-400">Privacy</a>
+      </div>
+      <div class="flex space-x-4">
+        <!-- Social icons -->
+        <a href="https://github.com/DevAsmodeus07/Codeon" class="text-gray-400 hover:text-blue-400" aria-label="GitHub">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.2-.8.1-.8.1-.8 1.3.1 2 .9 2 .9 1.2 2 3.1 1.4 3.8 1.1.1-.8.5-1.4.8-1.7-2.6-.3-5.4-1.3-5.4-5.9 0-1.3.5-2.4 1.2-3.3-.1-.3-.5-1.6.1-3.3 0 0 1-.3 3.4 1.2a11.6 11.6 0 0 1 6.2 0c2.4-1.5 3.4-1.2 3.4-1.2.6 1.7.2 3 .1 3.3.8.9 1.2 2 1.2 3.3 0 4.6-2.8 5.6-5.4 5.9.5.4.9 1.2.9 2.4v3.5c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"/></svg>
+        </a>
+        <a href="https://x.com" class="text-gray-400 hover:text-blue-400" aria-label="Twitter">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"
+           width="20" height="20" aria-label="X" role="img"
+           class="text-gray-400 hover:text-blue-400 transition"
+           fill="currentColor">
+            <path d="M72.2 17H86.9L57.3 50.2L92 103H62.7L41.6 71.6L16.9 103H2.2L33.8 68.6L0 17H30.1L49.6 46.1L72.2 17ZM66.9 94.6H75.1L33.4 24.7H24.7L66.9 94.6Z"/>
+          </svg>
+        </a>
+       
+
+
+      </div>
+    </div>
+    <div class="mt-6 text-center text-gray-500 text-xs">© 2025 Codeon. All rights reserved.</div>
+  </footer>
+
+  <!-- Scripts: fade-in on scroll + particles background -->
+  <script>
+    // Intersection Observer for fade-in/slide-up
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('is-visible');
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.animate-fadeIn, .animate-slideUp').forEach(el => observer.observe(el));
+
+    // Simple particles background
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let width, height, particles;
+
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      particles = Array.from({ length: Math.floor((width * height) / 15000) }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: Math.random() * 1.8 + 0.6,
+        dx: (Math.random() - 0.5) * 0.4,
+        dy: (Math.random() - 0.5) * 0.4,
+        c: Math.random() > 0.5 ? 'rgba(59,130,246,0.7)' : 'rgba(147,51,234,0.6)'
+      }));
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+      particles.forEach(p => {
+        p.x += p.dx; p.y += p.dy;
+        if (p.x < 0 || p.x > width) p.dx *= -1;
+        if (p.y < 0 || p.y > height) p.dy *= -1;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.c;
+        ctx.fill();
+      });
+      requestAnimationFrame(draw);
+    }
+    draw();
+  </script>
+</body>
+  </html>
+  
