@@ -10,22 +10,32 @@
 </head>
 <body class="bg-black overflow-x-hidden">
 
-  <!-- Blurred background logo -->
   <img src="Codeonlogo.jpg"
        alt=""
        class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] object-contain opacity-50 blur-lg pointer-events-none z-0" />
 
-  <!-- Toast notification -->
+  <!--
+    TOAST NOTIFICATION
+    id="toast"              → shown on successful account creation
+    id="toast-message"      → backend can inject custom success message here
+    Backend: remove 'hidden' class and set toast-message text after successful POST /api/auth/register
+  -->
   <div id="toast" class="hidden fixed top-5 right-5 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-50 transition-all">
-    ✅ Account created successfully! Redirecting to login...
+    ✅ <span id="toast-message">Account created successfully! Redirecting to login...</span>
   </div>
 
-  <!-- Full-page centering wrapper -->
+  <!--
+    ERROR TOAST — for failed signup attempts
+    Backend: remove 'hidden', inject error message into error-toast-message
+  -->
+  <div id="error-toast" class="hidden fixed top-5 right-5 bg-red-600 text-white px-4 py-3 rounded-lg shadow-lg z-50 transition-all">
+    ❌ <span id="error-toast-message">Something went wrong. Please try again.</span>
+  </div>
+
   <div class="relative z-10 min-h-screen flex items-center justify-center px-4 py-4">
 
     <div class="flex flex-col md:flex-row w-full max-w-4xl rounded-xl overflow-hidden shadow-2xl">
 
-      <!-- Left section -->
       <div class="hidden md:flex w-full md:w-1/2 bg-gray-900/60 flex-col justify-center items-center text-center p-10">
         <h1 class="text-4xl font-bold">
           <span class="text-blue-400">Join</span>
@@ -43,25 +53,28 @@
       <div class="w-full md:w-1/2 bg-gray-950/90 flex flex-col justify-center items-center px-8 py-4 md:px-10 md:py-5">
         <div class="w-full max-w-sm">
 
-          <!-- Logo: wide & prominent, bigger height -->
           <div class="flex items-center justify-center mb-3">
             <img src="assets/codeonbg.png"
                  alt="Codeon Logo"
                  style="width: 100%; max-width: 340px; height: 112px; object-fit: contain;" />
           </div>
 
-          <p class="text-xs uppercase text-gray-400 mb-0">Get Started</p>
-          <h2 class="text-xl font-bold text-white leading-tight">Create Your Codeon Account</h2>
+          <!-- <p class="text-xs uppercase text-gray-400 mb-0">Get Started</p> -->
+          <h2 class="text-xl font-bold text-white leading-tight">Create Your Codeon Account</h2><br>
           <p class="text-gray-400 text-sm mb-2">Your journey to smarter audits begins here.</p>
 
-          <!-- Google button -->
-          <button class="w-full flex items-center justify-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white py-2 rounded-md mb-2 transition-colors">
+          <!-- Google OAuth button — backend: attach Google OAuth redirect on click -->
+          <button
+            id="btn-google-signup"
+            class="w-full flex items-center justify-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white py-2 rounded-md mb-2 transition-colors">
             <img src="https://www.svgrepo.com/show/355037/google.svg" alt="Google" class="w-5 h-5" />
             <span>Sign Up with Google</span>
           </button>
 
-          <!-- GitHub button -->
-          <button class="w-full flex items-center justify-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white py-2 rounded-md mb-2 transition-colors">
+          <!-- GitHub OAuth button — backend: attach GitHub OAuth redirect on click -->
+          <button
+            id="btn-github-signup"
+            class="w-full flex items-center justify-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white py-2 rounded-md mb-2 transition-colors">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577
                        0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755
@@ -84,18 +97,52 @@
             <hr class="flex-grow border-gray-700" />
           </div>
 
-          <!-- Form -->
-          <form id="signupForm" class="space-y-2">
-            <input type="text" placeholder="Full Name"
-                   class="w-full px-4 py-2 rounded bg-gray-800 text-white focus:outline-none focus:ring-1 focus:ring-blue-500" required />
-            <input type="email" placeholder="Authorized Email"
-                   class="w-full px-4 py-2 rounded bg-gray-800 text-white focus:outline-none focus:ring-1 focus:ring-blue-500" required />
-            <input type="password" placeholder="Create Password"
-                   class="w-full px-4 py-2 rounded bg-gray-800 text-white focus:outline-none focus:ring-1 focus:ring-blue-500" required />
-            <button type="submit"
-                    class="w-full bg-white text-black font-semibold py-2 rounded hover:bg-gray-200 transition-colors">
+          <!--
+            SIGNUP FORM
+            Backend hooks:
+            - id="signup-form"          → listen for submit, send POST /api/auth/register
+            - id="signup-fullname"      → user's full name, sent as { fullName } in request body
+            - id="signup-email"         → user's email, sent as { email } in request body
+            - id="signup-password"      → user's password, sent as { password } in request body
+            - id="signup-error"         → show inline error here if registration fails
+            - id="btn-signup-submit"    → disable while API request is loading, show spinner
+          -->
+          <form id="signup-form" class="space-y-2">
+
+            <input
+              id="signup-fullname"
+              type="text"
+              name="fullName"
+              placeholder="Full Name"
+              class="w-full px-4 py-2 rounded bg-gray-800 text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+              required />
+
+            <input
+              id="signup-email"
+              type="email"
+              name="email"
+              placeholder="Authorized Email"
+              class="w-full px-4 py-2 rounded bg-gray-800 text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+              required />
+
+            <input
+              id="signup-password"
+              type="password"
+              name="password"
+              placeholder="Create Password"
+              class="w-full px-4 py-2 rounded bg-gray-800 text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+              required />
+
+            <!-- Inline error — hidden by default, shown if registration fails -->
+            <p id="signup-error" class="hidden text-red-400 text-xs mt-1"></p>
+
+            <button
+              id="btn-signup-submit"
+              type="submit"
+              class="w-full bg-white text-black font-semibold py-2 rounded hover:bg-gray-200 transition-colors">
               Create Account →
             </button>
+
           </form>
 
           <p class="text-gray-400 text-sm mt-3 text-center">
@@ -110,8 +157,15 @@
   </div>
 
   <script>
-    const form = document.getElementById('signupForm');
+    /*
+      CURRENT: placeholder submit handler (shows toast, redirects to login)
+      BACKEND REPLACEMENT: remove this script block entirely and replace with
+      a fetch() POST to /api/auth/register, then handle success/error using
+      the id hooks above
+    */
+    const form = document.getElementById('signup-form');
     const toast = document.getElementById('toast');
+    const errorToast = document.getElementById('error-toast');
 
     form.addEventListener('submit', function(e) {
       e.preventDefault();
