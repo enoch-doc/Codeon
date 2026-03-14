@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Codeon</title>
+  <link rel="shortcut icon" type="image/x-icon" href="assets/codeonbgremoved.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Space Grotesk', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.3); border-radius: 2px; }
+
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    @keyframes glow-pulse {
+      0%, 100% { box-shadow: 0 0 15px rgba(59,130,246,0.1); }
+      50% { box-shadow: 0 0 30px rgba(59,130,246,0.25); }
+    }
+    .glow-card { animation: glow-pulse 4s ease-in-out infinite; }
+
+    @keyframes scan {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(400%); }
+    }
+    .scan-btn { position: relative; overflow: hidden; }
+    .scan-btn::after {
+      content: '';
+      position: absolute;
+      left: 0; width: 100%; height: 30%;
+      background: linear-gradient(transparent, rgba(255,255,255,0.08), transparent);
+      animation: scan 2.5s linear infinite;
+    }
+
+    /* Sidebar nav hover */
+    .nav-item { transition: all 0.2s ease; }
+    .nav-item:hover { padding-left: 1.25rem; }
+
+    /* Table row hover glow */
+    .contract-row:hover { background: rgba(59,130,246,0.05); }
+    .contract-row { transition: background 0.2s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.5s ease forwards; opacity: 0; }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .delay-5 { animation-delay: 0.5s; }
+
+    /* Badge colours */
+    .grade-a  { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+    .grade-b  { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+    .grade-c  { background: rgba(234,179,8,0.15);  color: #fbbf24; border: 1px solid rgba(234,179,8,0.3); }
+    .grade-d  { background: rgba(239,68,68,0.15);  color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+
+    /* ── Sidebar: always visible on large, slide-in overlay on mobile ── */
+    @media (max-width: 1023px) {
+      #sidebar {
+        position: fixed;
+        top: 0; left: 0; bottom: 0;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 50;
+        width: 14rem !important;
+      }
+      #sidebar.open { transform: translateX(0); }
+      #sidebar-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(2px);
+        z-index: 40;
+      }
+      #sidebar-backdrop.open { display: block; }
+    }
+    @media (min-width: 1024px) {
+      #sidebar { position: relative; transform: none !important; }
+      #sidebar-backdrop { display: none !important; }
+      #hamburger { display: none !important; }
+    }
+  </style>
+</head>
+
+<body class="bg-[#060b18] text-white overflow-hidden h-screen flex grid-bg">
+
+  <!-- Ambient blobs -->
+  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <div class="absolute top-[-15%] left-[-10%] w-[500px] h-[500px] rounded-full opacity-[0.07]" style="background:radial-gradient(circle,#3b82f6,transparent 70%)"></div>
+    <div class="absolute bottom-[-10%] right-[5%] w-[400px] h-[400px] rounded-full opacity-[0.06]" style="background:radial-gradient(circle,#6366f1,transparent 70%)"></div>
+    <div class="absolute top-[40%] left-[40%] w-[300px] h-[300px] rounded-full opacity-[0.04]" style="background:radial-gradient(circle,#0ea5e9,transparent 70%)"></div>
+    <!-- Blurred Codeon logo in background -->
+    <img src="Codeonlogo.png" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] object-contain opacity-[0.03] blur-3xl pointer-events-none" />
+  </div>
+
+  <!-- Backdrop for mobile sidebar -->
+  <div id="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
+  <!-- ════════════════════════════
+       SIDEBAR
+  ════════════════════════════ -->
+  <aside id="sidebar" class="relative z-20 w-56 flex-shrink-0 flex flex-col bg-gray-950/80 border-r border-white/[0.06] backdrop-blur-2xl">
+
+    <!-- Logo -->
+    <div class="flex items-center gap-3 px-4 py-5 border-b border-white/[0.06]">
+      <img src="codeonbg.png" alt="Codeon"
+        class="h-8 object-contain"
+        style="filter:drop-shadow(0 0 10px rgba(59,130,246,0.6))" />
+    </div>
+
+    <!-- Nav -->
+    <nav class="flex-1 py-5 px-3 space-y-1 overflow-y-auto">
+
+      <p class="sidebar-label text-[10px] text-gray-600 uppercase tracking-widest px-3 mb-2">Main</p>
+
+      <a href="#" class="nav-item tooltip-wrap flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-600/20 text-blue-400 border border-blue-500/30 text-sm font-medium">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span class="sidebar-label">Dashboard</span>
+        <span class="tooltip-text">Dashboard</span>
+      </a>
+
+      <a href="#" class="nav-item tooltip-wrap flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/[0.05] text-sm font-medium">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span class="sidebar-label">History</span>
+        <span class="tooltip-text">History</span>
+      </a>
+
+      <a href="#" class="nav-item tooltip-wrap flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/[0.05] text-sm font-medium">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span class="sidebar-label">Upload Contract</span>
+        <span class="tooltip-text">Upload</span>
+      </a>
+
+      <a href="#" class="nav-item tooltip-wrap flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/[0.05] text-sm font-medium">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+        <span class="sidebar-label">Comparison Tool</span>
+        <span class="tooltip-text">Compare</span>
+      </a>
+
+      <p class="sidebar-label text-[10px] text-gray-600 uppercase tracking-widest px-3 mt-4 mb-2">Account</p>
+
+      <a href="#" class="nav-item tooltip-wrap flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/[0.05] text-sm font-medium">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        <span class="sidebar-label">Settings</span>
+        <span class="tooltip-text">Settings</span>
+      </a>
+
+      <a href="#" class="nav-item tooltip-wrap flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/[0.05] text-sm font-medium">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <span class="sidebar-label">Upgrade Plan</span>
+        <span class="tooltip-text">Upgrade</span>
+      </a>
+
+      <a href="#" class="nav-item tooltip-wrap flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/[0.05] text-sm font-medium">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span class="sidebar-label">Contact Support</span>
+        <span class="tooltip-text">Support</span>
+      </a>
+    </nav>
+
+    <!-- User footer -->
+    <div class="border-t border-white/[0.06] px-3 py-4 flex items-center gap-3">
+      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-bold flex-shrink-0 ring-2 ring-blue-500/30">DU</div>
+      <div class="user-info min-w-0">
+        <p class="text-sm font-semibold text-white truncate">dev.user</p>
+        <p class="text-xs text-gray-500 truncate mono">Pro Plan · Tier 2</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ════════════════════════════
+       MAIN CONTENT
+  ════════════════════════════ -->
+  <div class="relative z-10 flex-1 flex flex-col overflow-hidden">
+
+    <!-- Topbar -->
+    <header class="flex items-center justify-between px-6 py-3.5 border-b border-white/[0.06] bg-gray-950/60 backdrop-blur-2xl flex-shrink-0">
+      <div class="flex items-center gap-4">
+        <!-- Hamburger -->
+        <button id="hamburger" onclick="toggleSidebar()" class="text-gray-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/5">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div>
+          <h1 class="text-sm font-semibold text-white tracking-wide">Dashboard</h1>
+          <p class="text-[10px] text-gray-600 mono">codeon.workspace / dev.user</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <!-- Search -->
+        <div class="relative hidden md:block">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input placeholder="Search contracts..." class="bg-gray-900/80 border border-white/[0.08] rounded-lg pl-8 pr-4 py-1.5 text-xs text-gray-300 placeholder-gray-700 focus:outline-none focus:border-blue-500/50 w-48 transition-colors" />
+        </div>
+
+
+        <!-- Notification -->
+        <button class="relative text-gray-400 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/5">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="absolute top-1 right-1 w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
+        </button>
+
+        <!-- Avatar -->
+        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-[11px] font-bold cursor-pointer ring-2 ring-blue-500/30">DU</div>
+      </div>
+    </header>
+
+    <!-- Scrollable body -->
+    <main class="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+
+      <!-- ── Greeting row ── -->
+      <div class="fade-up delay-1 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h2 class="text-3xl font-bold text-white tracking-tight">Hi, dev.user <span class="text-blue-400">👋</span></h2>
+        </div>
+        <!-- Upload CTA -->
+        <button class="scan-btn flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-all duration-200 active:scale-95 whitespace-nowrap"
+          style="box-shadow:0 0 24px rgba(59,130,246,0.35)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Upload Smart Contract
+        </button>
+      </div>
+
+      <!-- ── Stat cards ── -->
+      <div class="fade-up delay-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+        <!-- Card 1 -->
+        <div class="glow-card relative rounded-xl p-5 border border-blue-500/20 bg-gray-900/60 backdrop-blur-sm overflow-hidden group">
+          <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background:linear-gradient(135deg,rgba(59,130,246,0.07),transparent)"></div>
+          <div class="flex items-start justify-between mb-3">
+            <div class="w-9 h-9 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <span class="mono text-[10px] text-gray-600">ALL TIME</span>
+          </div>
+          <p class="text-4xl font-bold text-white mono">42</p>
+          <p class="text-xs text-gray-500 mt-1">Total Contracts Analyzed</p>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="relative rounded-xl p-5 border border-indigo-500/20 bg-gray-900/60 backdrop-blur-sm overflow-hidden group">
+          <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background:linear-gradient(135deg,rgba(99,102,241,0.07),transparent)"></div>
+          <div class="flex items-start justify-between mb-3">
+            <div class="w-9 h-9 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <span class="mono text-[10px] text-gray-600">AVG SCORE</span>
+          </div>
+          <p class="text-4xl font-bold text-indigo-400 mono">B+</p>
+          <p class="text-xs text-gray-500 mt-1">Average Security Score</p>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="relative rounded-xl p-5 border border-red-500/20 bg-gray-900/60 backdrop-blur-sm overflow-hidden group">
+          <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background:linear-gradient(135deg,rgba(239,68,68,0.07),transparent)"></div>
+          <div class="flex items-start justify-between mb-3">
+            <div class="w-9 h-9 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <span class="mono text-[10px] text-gray-600">THIS MONTH</span>
+          </div>
+          <p class="text-4xl font-bold text-red-400 mono">3</p>
+          <p class="text-xs text-gray-500 mt-1">Critical Issues Found</p>
+        </div>
+      </div>
+
+      <!-- ── Middle row: Table + Quick Stats ── -->
+      <div class="fade-up delay-3 grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+        <!-- Recent analyses table — 2 cols wide -->
+        <div class="lg:col-span-2 rounded-xl border border-white/[0.07] bg-gray-900/50 backdrop-blur-sm overflow-hidden">
+          <div class="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+            <div class="flex items-center gap-2">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+              <h3 class="text-sm font-semibold text-white">Recent Analyses</h3>
+            </div>
+            <a href="#" class="text-xs text-blue-400 hover:text-blue-300 transition-colors">View all →</a>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-white/[0.05]">
+                  <th class="text-left px-5 py-3 text-[10px] text-gray-600 font-medium uppercase tracking-widest">Contract</th>
+                  <th class="text-left px-5 py-3 text-[10px] text-gray-600 font-medium uppercase tracking-widest">Grade</th>
+                  <th class="text-left px-5 py-3 text-[10px] text-gray-600 font-medium uppercase tracking-widest hidden md:table-cell">Date</th>
+                  <th class="text-left px-5 py-3 text-[10px] text-gray-600 font-medium uppercase tracking-widest">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="contract-row border-b border-white/[0.04]">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                      <span class="text-gray-200 mono text-xs">Wallet.sol</span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3.5"><span class="grade-a inline-flex items-center px-2 py-0.5 rounded text-xs font-bold mono">A</span></td>
+                  <td class="px-5 py-3.5 text-gray-500 text-xs hidden md:table-cell">Jan 15, 2026</td>
+                  <td class="px-5 py-3.5"><button class="text-xs bg-gray-800 hover:bg-blue-900/40 hover:text-blue-300 border border-white/[0.08] hover:border-blue-500/40 text-gray-400 px-3 py-1.5 rounded-lg transition-all">View Results</button></td>
+                </tr>
+                <tr class="contract-row border-b border-white/[0.04]">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                      <span class="text-gray-200 mono text-xs">DeFiProtocol.sol</span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3.5"><span class="grade-b inline-flex items-center px-2 py-0.5 rounded text-xs font-bold mono">B+</span></td>
+                  <td class="px-5 py-3.5 text-gray-500 text-xs hidden md:table-cell">Jan 15, 2026</td>
+                  <td class="px-5 py-3.5"><button class="text-xs bg-gray-800 hover:bg-blue-900/40 hover:text-blue-300 border border-white/[0.08] hover:border-blue-500/40 text-gray-400 px-3 py-1.5 rounded-lg transition-all">View Results</button></td>
+                </tr>
+                <tr class="contract-row border-b border-white/[0.04]">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                      <span class="text-gray-200 mono text-xs">NFTMarketplace.sol</span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3.5"><span class="grade-c inline-flex items-center px-2 py-0.5 rounded text-xs font-bold mono">C</span></td>
+                  <td class="px-5 py-3.5 text-gray-500 text-xs hidden md:table-cell">Jan 14, 2026</td>
+                  <td class="px-5 py-3.5"><button class="text-xs bg-gray-800 hover:bg-blue-900/40 hover:text-blue-300 border border-white/[0.08] hover:border-blue-500/40 text-gray-400 px-3 py-1.5 rounded-lg transition-all">View Results</button></td>
+                </tr>
+                <tr class="contract-row border-b border-white/[0.04]">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                      <span class="text-gray-200 mono text-xs">Token.sol</span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3.5"><span class="grade-d inline-flex items-center px-2 py-0.5 rounded text-xs font-bold mono">D+</span></td>
+                  <td class="px-5 py-3.5 text-gray-500 text-xs hidden md:table-cell">Jan 13, 2026</td>
+                  <td class="px-5 py-3.5"><button class="text-xs bg-gray-800 hover:bg-blue-900/40 hover:text-blue-300 border border-white/[0.08] hover:border-blue-500/40 text-gray-400 px-3 py-1.5 rounded-lg transition-all">View Results</button></td>
+                </tr>
+                <tr class="contract-row">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                      <span class="text-gray-200 mono text-xs">Exchange.sol</span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3.5"><span class="grade-d inline-flex items-center px-2 py-0.5 rounded text-xs font-bold mono">D+</span></td>
+                  <td class="px-5 py-3.5 text-gray-500 text-xs hidden md:table-cell">Jan 12, 2026</td>
+                  <td class="px-5 py-3.5"><button class="text-xs bg-gray-800 hover:bg-blue-900/40 hover:text-blue-300 border border-white/[0.08] hover:border-blue-500/40 text-gray-400 px-3 py-1.5 rounded-lg transition-all">View Results</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="flex items-center justify-center gap-1.5 px-5 py-3.5 border-t border-white/[0.05]">
+            <button class="w-7 h-7 rounded text-xs text-gray-600 hover:text-white hover:bg-white/5 transition-all">«</button>
+            <button class="w-7 h-7 rounded text-xs text-gray-600 hover:text-white hover:bg-white/5 transition-all">‹</button>
+            <button class="w-7 h-7 rounded text-xs bg-blue-600 text-white font-semibold">1</button>
+            <button class="w-7 h-7 rounded text-xs text-gray-600 hover:text-white hover:bg-white/5 transition-all">2</button>
+            <button class="w-7 h-7 rounded text-xs text-gray-600 hover:text-white hover:bg-white/5 transition-all">5</button>
+            <button class="w-7 h-7 rounded text-xs text-gray-600 hover:text-white hover:bg-white/5 transition-all">›</button>
+            <button class="w-7 h-7 rounded text-xs text-gray-600 hover:text-white hover:bg-white/5 transition-all">»</button>
+          </div>
+        </div>
+
+        <!-- Quick Stats panel -->
+        <div class="rounded-xl border border-white/[0.07] bg-gray-900/50 backdrop-blur-sm p-5 flex flex-col gap-5">
+          <div class="flex items-center gap-2">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            <h3 class="text-sm font-semibold text-white">Quick Stats</h3>
+          </div>
+
+          <div class="space-y-4">
+            <div class="flex items-center justify-between p-3 rounded-lg bg-gray-800/50 border border-white/[0.05]">
+              <div>
+                <p class="text-[10px] text-gray-600 uppercase tracking-widest mb-1">Total Gas Saved</p>
+                <p class="text-lg font-bold text-white mono">6.42 <span class="text-blue-400 text-sm">ETH</span></p>
+              </div>
+              <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between p-3 rounded-lg bg-gray-800/50 border border-white/[0.05]">
+              <div>
+                <p class="text-[10px] text-gray-600 uppercase tracking-widest mb-1">Most Common Issue</p>
+                <p class="text-sm font-bold text-yellow-400">Reentrancy</p>
+              </div>
+              <div class="w-8 h-8 rounded-lg bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between p-3 rounded-lg bg-gray-800/50 border border-white/[0.05]">
+              <div>
+                <p class="text-[10px] text-gray-600 uppercase tracking-widest mb-1">Avg Analysis Time</p>
+                <p class="text-sm font-bold text-white mono">2.3 <span class="text-gray-500 text-xs font-normal">mins</span></p>
+              </div>
+              <div class="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Grade distribution -->
+          <div>
+            <p class="text-[10px] text-gray-600 uppercase tracking-widest mb-3">Grade Distribution</p>
+            <div class="space-y-2.5">
+              <div class="flex items-center gap-2">
+                <span class="mono text-[11px] text-emerald-400 w-5">A</span>
+                <div class="flex-1 h-1.5 bg-gray-800 rounded-full overflow-hidden"><div class="h-full bg-emerald-400 rounded-full" style="width:20%"></div></div>
+                <span class="mono text-[10px] text-gray-600 w-6 text-right">20%</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="mono text-[11px] text-blue-400 w-5">B</span>
+                <div class="flex-1 h-1.5 bg-gray-800 rounded-full overflow-hidden"><div class="h-full bg-blue-400 rounded-full" style="width:35%"></div></div>
+                <span class="mono text-[10px] text-gray-600 w-6 text-right">35%</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="mono text-[11px] text-yellow-400 w-5">C</span>
+                <div class="flex-1 h-1.5 bg-gray-800 rounded-full overflow-hidden"><div class="h-full bg-yellow-400 rounded-full" style="width:25%"></div></div>
+                <span class="mono text-[10px] text-gray-600 w-6 text-right">25%</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="mono text-[11px] text-red-400 w-5">D</span>
+                <div class="flex-1 h-1.5 bg-gray-800 rounded-full overflow-hidden"><div class="h-full bg-red-400 rounded-full" style="width:20%"></div></div>
+                <span class="mono text-[10px] text-gray-600 w-6 text-right">20%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Vulnerability chart ── -->
+      <div class="fade-up delay-4 rounded-xl border border-white/[0.07] bg-gray-900/50 backdrop-blur-sm overflow-hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between px-5 py-4 border-b border-white/[0.06] gap-3">
+          <div class="flex items-center gap-2">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            <div>
+              <h3 class="text-sm font-semibold text-white">Vulnerability Trends</h3>
+              <p class="text-[10px] text-gray-600">Issues detected across last 6 months</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-400"></span><span class="text-[11px] text-gray-500">Critical</span></div>
+            <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-orange-400"></span><span class="text-[11px] text-gray-500">High</span></div>
+            <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-yellow-400"></span><span class="text-[11px] text-gray-500">Medium</span></div>
+          </div>
+        </div>
+        <div class="p-5">
+          <canvas id="vulnChart" height="90"></canvas>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    // ── Sidebar toggle (mobile only) ──
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebar-backdrop').classList.toggle('open');
+    }
+
+    // ── Vulnerability Chart ──
+    const ctx = document.getElementById('vulnChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan'],
+        datasets: [
+          {
+            label: 'Critical',
+            data: [4, 6, 3, 7, 2, 3],
+            borderColor: '#f87171',
+            backgroundColor: 'rgba(248,113,113,0.08)',
+            borderWidth: 2,
+            pointBackgroundColor: '#f87171',
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            tension: 0.4,
+            fill: true,
+          },
+          {
+            label: 'High',
+            data: [7, 9, 6, 11, 5, 8],
+            borderColor: '#fb923c',
+            backgroundColor: 'rgba(251,146,60,0.06)',
+            borderWidth: 2,
+            pointBackgroundColor: '#fb923c',
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            tension: 0.4,
+            fill: true,
+          },
+          {
+            label: 'Medium',
+            data: [12, 10, 14, 8, 11, 9],
+            borderColor: '#fbbf24',
+            backgroundColor: 'rgba(251,191,36,0.05)',
+            borderWidth: 2,
+            pointBackgroundColor: '#fbbf24',
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            tension: 0.4,
+            fill: true,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#0f172a',
+            borderColor: 'rgba(255,255,255,0.08)',
+            borderWidth: 1,
+            titleColor: '#e2e8f0',
+            bodyColor: '#94a3b8',
+            padding: 10,
+            titleFont: { family: 'JetBrains Mono', size: 11 },
+            bodyFont: { family: 'JetBrains Mono', size: 11 },
+          },
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+            ticks: { color: '#4b5563', font: { family: 'JetBrains Mono', size: 10 } },
+          },
+          y: {
+            grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+            ticks: { color: '#4b5563', font: { family: 'JetBrains Mono', size: 10 } },
+          },
+        },
+      },
+    });
+  </script>
+</body>
+</html>
